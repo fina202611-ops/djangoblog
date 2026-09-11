@@ -1,3 +1,4 @@
+from decouple import config
 import os
 from dotenv import load_dotenv
 from pathlib import Path
@@ -79,10 +80,18 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+from decouple import Config, RepositoryEnv
+
+env_config = Config(RepositoryEnv('.env', encoding='utf-8'))
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env_config('DB_NAME'),
+        'USER': env_config('DB_USER'),
+        'PASSWORD': env_config('DB_PASSWORD'),
+        'HOST': env_config('DB_HOST', default='localhost'),
+        'PORT': env_config('DB_PORT', default='5432'),
     }
 }
 
