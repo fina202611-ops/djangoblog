@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import slugify
+from django.utils.text import slugify
 
 class Post(models.Model):
     STATUS_CHOICES = [
