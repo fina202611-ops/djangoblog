@@ -4,6 +4,9 @@ from django.shortcuts import render
 
 from .models import Post
 
+def post_list(request):
+    posts = Post.objects.filter(status='Published') # zabiraem opublikovannye posty
+    return render(request, 'blog/post_list.html', {'posts': posts})
 
 def home(request):
     return render(request, "blog/home.html", {"title": "Home"})
