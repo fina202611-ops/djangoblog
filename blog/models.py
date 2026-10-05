@@ -25,6 +25,7 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(blank=True, unique=True)
     content = models.TextField()
+    cover_image = models.ImageField(upload_to="post_covers/", blank=True, null=True)  # 👇 追加
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default="published"
     )
