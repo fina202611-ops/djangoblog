@@ -1,5 +1,16 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from .models import Post
+
+
+class RegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True)  # Делаем email обязательным полем
+
+    class Meta:
+        model = User
+        fields = ["username", "email"]
+
 
 class PostForm(forms.ModelForm):
     class Meta:
@@ -18,7 +29,6 @@ class PostForm(forms.ModelForm):
             raise forms.ValidationError("Title must be at least 5 characters long.")
         return title
 
-    # 👇 Добавьте метод сюда
     def clean_cover_image(self):
         image = self.cleaned_data.get("cover_image")
         if image:

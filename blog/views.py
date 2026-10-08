@@ -1,9 +1,12 @@
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.contrib.auth import login  # 👇 追加
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
-from .models import Post, Category
-from .forms import PostForm  # 👇 Добавлен импорт
+from django.views.generic import DetailView, ListView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+
+from .forms import PostForm, RegisterForm  # 👇 RegisterForm を追加
+from .models import Category, Post
+
 
 class PostListView(ListView):
     model = Post
@@ -18,6 +21,7 @@ class PostListView(ListView):
         context["categories"] = Category.objects.all()
         return context
 
+
 class PostDetailView(DetailView):
     model = Post
     template_name = "blog/post_detail.html"
@@ -26,29 +30,46 @@ class PostDetailView(DetailView):
     def get_queryset(self):
         return Post.objects.filter(status="published")
 
+
 class PostCreateView(CreateView):
     model = Post
-    form_class = PostForm  # 👇 Поле fields заменено на form_class
+    form_class = PostForm
     template_name = "blog/post_form.html"
 
     def get_success_url(self):
         return reverse_lazy("post_detail", kwargs={"slug": self.object.slug})
+
 
 class PostUpdateView(UpdateView):
     model = Post
-    form_class = PostForm  # 👇 Поле fields заменено на form_class
+    form_class = PostForm
     template_name = "blog/post_form.html"
 
     def get_success_url(self):
         return reverse_lazy("post_detail", kwargs={"slug": self.object.slug})
+
 
 class PostDeleteView(DeleteView):
     model = Post
     template_name = "blog/post_confirm_delete.html"
     success_url = reverse_lazy("home")
 
+
+# 👇 ここから新規追加
+class RegisterView(CreateView):
+    form_class = RegisterForm
+    template_name = "blog/register.html"
+    success_url = "/"
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)
+        return response
+
+
 def about(request):
     return render(request, "blog/about.html", {"team": "DjangoBlog Team"})
+
 
 def contact(request):
     return render(request, "blog/contact.html")
