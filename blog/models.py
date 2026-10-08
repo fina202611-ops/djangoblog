@@ -1,6 +1,7 @@
+from django.conf import settings  # 👇 Добавили импорт
 from django.db import models
 from django.utils.text import slugify
-from PIL import Image  # 👈 Добавили импорт Pillow
+from PIL import Image
 
 
 class Category(models.Model):
@@ -30,6 +31,14 @@ class Post(models.Model):
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default="published"
     )
+    
+    # 👇 Добавлено поле author
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="posts",
+    )
+    
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
