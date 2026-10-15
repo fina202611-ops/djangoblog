@@ -1,4 +1,4 @@
-from django.conf import settings  # 👇 Добавили импорт
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 from PIL import Image
@@ -32,7 +32,6 @@ class Post(models.Model):
         max_length=10, choices=STATUS_CHOICES, default="published"
     )
     
-    # 👇 Добавлено поле author
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -52,12 +51,16 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            while Post.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
 
-        # 1. Сначала базовое сохранение в базу и на диск
         super().save(*args, **kwargs)
 
-        # 2. Если есть картинка, уменьшаем её до max 800x800
         if self.cover_image:
             img_path = self.cover_image.path
             img = Image.open(img_path)
