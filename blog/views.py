@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
@@ -33,8 +34,6 @@ class PostDetailView(DetailView):
     context_object_name = "post"
 
     def get_queryset(self):
-        # Авторизованный автор может просматривать свои черновики,
-        # а остальные пользователи — только опубликованные посты.
         if self.request.user.is_authenticated:
             return Post.objects.filter(
                 Q(status="published") | Q(author=self.request.user)
@@ -50,6 +49,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
+        messages.success(self.request, "Post published successfully!")  # 👈 Добавлено
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -65,6 +65,10 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         return self.get_object().author == self.request.user
 
+    def form_valid(self, form):
+        messages.success(self.request, "Post updated successfully!")  # 👈 Добавлено
+        return super().form_valid(form)
+
     def get_success_url(self):
         return reverse_lazy("post_detail", kwargs={"slug": self.object.slug})
 
@@ -77,6 +81,10 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.get_object().author == self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, "Post deleted successfully!")  # 👈 Добавлено
+        return super().form_valid(form)
 
 
 class RegisterView(CreateView):
@@ -108,6 +116,7 @@ def about(request):
 
 def contact(request):
     return render(request, "blog/contact.html")
+
 
 def custom_403(request, exception=None):
     return render(request, "blog/403.html", status=403)
